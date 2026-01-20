@@ -25,15 +25,12 @@ const RISK_DOT = {
 
 export default function RiskPage() {
   const [risks, setRisks] = useState([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     api
       .get("/risk/risk")
-      .then((res) => {
-        setRisks(res.data);
-        console.log("Risk API data:", res.data);
-      })
+      .then((res) => setRisks(res.data))
       .catch(() => setRisks([]));
   }, []);
 
@@ -51,16 +48,20 @@ export default function RiskPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        closeSidebar={() => setIsSidebarOpen(false)}
-      />
+    <div className="h-screen bg-gray-50 flex flex-col">
+      {/* Navbar */}
+      <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-      <div className="flex-1">
-        <Navbar toggleSidebar={() => setIsSidebarOpen((p) => !p)} />
+      {/* Main Layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar
+          isOpen={sidebarOpen}
+          closeSidebar={() => setSidebarOpen(false)}
+        />
 
-        <div className="p-6">
+        {/* Content */}
+        <main className="flex-1 p-6 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4 text-blue-700">
             Risk Flags
           </h2>
@@ -68,15 +69,15 @@ export default function RiskPage() {
           {/* Legend */}
           <div className="flex items-center gap-6 mb-4 text-sm">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500"></span>
+              <span className="w-3 h-3 rounded-full bg-red-500" />
               <span>Needs Immediate Attention</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+              <span className="w-3 h-3 rounded-full bg-yellow-400" />
               <span>On Track (Needs Monitoring)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-green-500"></span>
+              <span className="w-3 h-3 rounded-full bg-green-500" />
               <span>Doing Well</span>
             </div>
           </div>
@@ -103,11 +104,9 @@ export default function RiskPage() {
                     <td className="p-3">{r.student_id}</td>
                     <td className="p-3">{r.name}</td>
                     <td className="p-3">{r.class_name}</td>
-
                     <td className="p-3 text-center">
                       {statusBadge(r.risk_level)}
                     </td>
-
                     <td className="p-3">{r.notes || "-"}</td>
                   </tr>
                 ))}
@@ -125,7 +124,7 @@ export default function RiskPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
