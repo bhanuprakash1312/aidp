@@ -11,3 +11,4 @@ alembic
 passlib
 python-jose
 python-dotenv
+sklearn
