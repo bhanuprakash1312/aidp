@@ -15,6 +15,7 @@ def create_super_admin():
     db.add(user)
     db.commit()
     db.close()
+    print("Super admin created successfully.")
 
 if __name__ == "__main__":
     create_super_admin()
