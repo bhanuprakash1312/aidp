@@ -1,16 +1,32 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import Loader from "../components/Loader";
 
 
 export default function LoginPage() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(email, password);
+    try{
+      setLoading(true);
+      login(email, password);
+    }
+    catch(err){
+      console.error("Login failed:", err);
+      
+    }
+    finally{
+      setLoading(false);
+    }
+    
   };
+  if (loading) {
+    return <Loader size={50} color="blue" />;
+  }
 
 
   return (
