@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models import Student,RiskHistory
-from app.services.risk_engine import calculate_risk
+
 from app.core.deps import get_current_user
 
 
@@ -17,28 +17,7 @@ def get_db():
 
 @router.get("/")
 def get_risk_students(db: Session = Depends(get_db)):
-    students = db.query(Student).all()
-    result = []
-
-    for s in students:
-        risk = calculate_risk(s.attendance,s.fee_due,s.grade)
-        history = RiskHistory(
-            student_id=s.id,
-            risk_level=risk,
-            class_name = s.class_name,
-            attendance=s.attendance,
-            grade=s.grade,
-            fee_due = s.fee_due)
-        db.add(history)
-        result.append({
-            "student_id": s.id,
-            "name": s.name,
-            "risk_level": risk
-        })
-
-        db.commit()
-        
-    return result
+    pass
 @router.get("/risk")
 def get_risk_history(
     db: Session = Depends(get_db),
