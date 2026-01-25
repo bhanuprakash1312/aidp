@@ -26,6 +26,10 @@ const RISK_DOT = {
 export default function RiskPage() {
   const [risks, setRisks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+   
+  useEffect(()=>{
+    api.get("/").then((res)=>console.log(res.data)).catch((err)=>console.error(err));
+  });
 
   useEffect(() => {
     api
