@@ -27,16 +27,16 @@ export default function RiskPage() {
   const [risks, setRisks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
    
-  useEffect(()=>{
-    api.get("/").then((res)=>console.log(res.data)).catch((err)=>console.error(err));
-  });
-
   useEffect(() => {
-    api
-      .get("/risk/risk")
+    // Call both APIs at once
+    api.get("/")
+      .then((res) => console.log(res.data))
+      .catch((err) => console.error(err));
+
+    api.get("/risk/risk")
       .then((res) => setRisks(res.data))
       .catch(() => setRisks([]));
-  }, []);
+  }, []); // Still only runs once after the website is opened
 
   const statusBadge = (riskLevel) => {
     const key = riskLevel?.toLowerCase()?.trim() || "enrolled";
