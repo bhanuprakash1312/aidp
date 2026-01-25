@@ -8,7 +8,7 @@ from app.routes import auth , dashboard
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# load_dotenv()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
@@ -18,7 +18,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Dropout Prediction API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL] if FRONTEND_URL else ["*"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
