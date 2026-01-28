@@ -44,7 +44,10 @@ def get_risk_students(db: Session = Depends(get_db)):
 def get_risk_history(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
+    page: int =1,
+    limit: int = 10,
 ):
+    offset = (page - 1) * limit
     query = (
         db.query(
             RiskHistory.id,
@@ -62,11 +65,16 @@ def get_risk_history(
         query = query.filter(
             Student.class_name == current_user["class_assigned"]
         )
+    total = query.count()
 
-    results = query.all()
+    results = query.order_by(RiskHistory.created_at.desc()).offset(offset).limit(limit).all()
 
-    return [
-        {
+    return {
+         "page":page,
+         "limit":limit,
+         "total":total,
+         "data":[
+               {
             "id": r.id,
             "student_id": r.student_id,
             "name": r.name,
@@ -74,8 +82,10 @@ def get_risk_history(
             "risk_level": r.risk_level,
             "created_at": r.created_at,
             "notes": "-",   # 👈 SAFE DEFAULT
-        }
-        for r in results
-    ]
+            }
+            for r in results
+         ]
+       
+    }
 
 

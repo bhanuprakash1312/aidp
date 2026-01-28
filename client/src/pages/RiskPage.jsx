@@ -27,13 +27,20 @@ export default function RiskPage() {
   const [risks, setRisks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     // Call both APIs at once
-    api.get("/risk/risk")
-      .then((res) => setRisks(res.data))
+    api.get(`/risk/risk?page=${page}&limit=${limit}`)
+      .then((res) => {
+        setRisks(res.data.data);
+        setTotal(res.data.total);
+      })
       .catch(() => setRisks([]));
   }, []); // Still only runs once after the website is opened
+  const totalPages = Math.ceil(total / limit);
 
   const handleEvaluate = async () => {
     try {
@@ -157,6 +164,29 @@ export default function RiskPage() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="flex justify-between items-center mt-4">
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Prev
+              </button>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(page + 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </main>
       </div>
