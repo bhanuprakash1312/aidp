@@ -3,7 +3,7 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
-/* Parent-friendly labels */
+/* Labels */
 const RISK_TEXT = {
   dropout: "Needs Immediate Attention",
   enrolled: "On Track (Needs Monitoring)",
@@ -34,7 +34,10 @@ export default function RiskPage() {
 
   const totalPages = Math.ceil(total / limit);
 
-  /* Fetch risks (optimized & safe) */
+  /* Pagination window size */
+  const PAGE_WINDOW = 10;
+
+  /* Fetch risks */
   const fetchRisks = async () => {
     try {
       const res = await api.get("/risk/risk", {
@@ -54,20 +57,21 @@ export default function RiskPage() {
     fetchRisks();
   }, [page]);
 
-  /* Generate page numbers */
-  const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
+  /* Window calculation */
+  const currentWindow = Math.floor((page - 1) / PAGE_WINDOW);
+  const startPage = currentWindow * PAGE_WINDOW + 1;
+  const endPage = Math.min(startPage + PAGE_WINDOW - 1, totalPages);
+
+  const pageNumbers = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
 
   const statusBadge = (riskLevel) => {
     const key = riskLevel?.toLowerCase()?.trim() || "enrolled";
 
     return (
-      <span className={`flex items-center justify-center gap-2 ${RISK_STYLE[key]}`}>
+      <span className={`flex items-center gap-2 ${RISK_STYLE[key]}`}>
         <span className={`w-3 h-3 rounded-full ${RISK_DOT[key]}`} />
         {RISK_TEXT[key]}
       </span>
@@ -129,11 +133,22 @@ export default function RiskPage() {
             </table>
           </div>
 
-          {/* Old-style pagination (page numbers) */}
+          {/* Pagination (10 pages + arrows) */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6">
-              <div className="flex gap-2 flex-wrap">
-                {getPageNumbers().map((p) => (
+              <div className="flex items-center gap-2 flex-wrap">
+
+                {/* ← Previous window */}
+                <button
+                  disabled={startPage === 1}
+                  onClick={() => setPage(startPage - 1)}
+                  className="px-3 py-1 border rounded disabled:opacity-40"
+                >
+                  ←
+                </button>
+
+                {/* Page numbers */}
+                {pageNumbers.map((p) => (
                   <button
                     key={p}
                     onClick={() => setPage(p)}
@@ -148,6 +163,16 @@ export default function RiskPage() {
                     {p}
                   </button>
                 ))}
+
+                {/* → Next window */}
+                <button
+                  disabled={endPage === totalPages}
+                  onClick={() => setPage(endPage + 1)}
+                  className="px-3 py-1 border rounded disabled:opacity-40"
+                >
+                  →
+                </button>
+
               </div>
             </div>
           )}
