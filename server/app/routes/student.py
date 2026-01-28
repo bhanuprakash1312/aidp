@@ -44,7 +44,7 @@ def get_students(
         )
     )
 
-    if current_user.role == "admin":
+    if current_user["role"] == "admin":
         query = query.filter(
             Student.class_name == current_user.class_assigned
         )
