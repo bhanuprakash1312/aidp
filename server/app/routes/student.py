@@ -87,6 +87,8 @@ def upload_students(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    REQUIRED_COLUMNS = ["name", "class_name", "attendance", "grade", "fee_due"]
+
     try:
         print("UPLOAD HIT")
 
@@ -96,25 +98,52 @@ def upload_students(
         for i, row in df.iterrows():
             print("ROW:", i, row.to_dict())
 
-            student = Student(
-                name=str(row["name"]).strip(),
-                class_name=str(row["class_name"]).strip(),
-                attendance=float(row["attendance"]),
-                grade=float(row["grade"]),
-                fee_due=float(row["fee_due"]),
-            )
+            # ✅ Normalize column names (Name → name, CLASS_NAME → class_name)
+            row = {str(k).strip().lower(): v for k, v in row.to_dict().items()}
+
+            # ✅ Validate required columns
+            for col in REQUIRED_COLUMNS:
+                if col not in row:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Missing required column: {col}",
+                    )
+
+            try:
+                student = Student(
+                    name=str(row["name"]).strip(),
+                    class_name=str(row["class_name"]).strip(),
+                    attendance=float(row["attendance"]),
+                    grade=str(row["grade"]).strip(),   # ✅ FIXED
+                    fee_due=float(row["fee_due"]),
+                )
+
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"Invalid data type in row {i + 2}. "
+                        "Attendance and Fee Due must be numeric."
+                    ),
+                )
 
             db.add(student)
-            db.commit()   # 👈 COMMIT PER ROW (IMPORTANT)
+            db.commit()   # commit per row (your choice)
 
-        
+        return {"detail": "Upload finished successfully"}
 
-        return {"detail": "Upload finished"}
+    except HTTPException:
+        # pass through clean errors
+        raise
 
     except Exception as e:
         print("🔥 ERROR OCCURRED 🔥")
         print(e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail="Unexpected server error during Excel upload",
+        )
+
 
 # @router.get("/{student_id}", response_model=schemas.StudentOut)
 # def get_student(student_id: int, db:Session = Depends(get_db)):
