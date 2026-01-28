@@ -3,6 +3,7 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
+
 /* Labels */
 const RISK_LABELS = {
   dropout: "Needs Immediate Attention",
@@ -18,11 +19,16 @@ const RISK_BADGE_CLASSES = {
 };
 
 export default function StudentsPage() {
+  const { user } = useAuth();
+
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useAuth();
-  /* 🔐 TEMP: replace with auth role */
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+
   const isSuperAdmin = user?.role === "super_admin";
 
   /* Filters */
@@ -34,73 +40,64 @@ export default function StudentsPage() {
     feeDue: "",
   });
 
+  /* Fetch students (backend pagination) */
   useEffect(() => {
     api
-      .get("/students/")
+      .get("/students/", { params: { page, limit } })
       .then((res) => {
-        setStudents(res.data);
-        setFilteredStudents(res.data);
+        setStudents(res.data.data);
+        setFilteredStudents(res.data.data);
+        setTotal(res.data.total);
       })
       .catch(() => {
         setStudents([]);
         setFilteredStudents([]);
+        setTotal(0);
       });
-  }, []);
+  }, [page, limit]);
 
-  /* Apply filters */
-useEffect(() => {
-  let data = [...students];
+  /* Apply filters (client-side) */
+  useEffect(() => {
+    let data = [...students];
 
-  if (filters.class) {
-    data = data.filter(
-      (s) => s.class_name === filters.class
-    );
-  }
+    if (filters.class) {
+      data = data.filter((s) => s.class_name === filters.class);
+    }
 
-  if (filters.status) {
-    data = data.filter(
-      (s) =>
-        s.risk_level
-          ?.toLowerCase()
-          .trim()
-          .includes(filters.status)
-    );
-  }
+    if (filters.status) {
+      data = data.filter((s) =>
+        s.risk_level?.toLowerCase().includes(filters.status)
+      );
+    }
 
-  if (filters.grade) {
-    data = data.filter(
-      (s) =>
-        s.grade
-          ?.toLowerCase()
-          .trim() ===
-        filters.grade.toLowerCase().trim()
-    );
-  }
+    if (filters.grade) {
+      data = data.filter(
+        (s) =>
+          s.grade?.toLowerCase().trim() ===
+          filters.grade.toLowerCase().trim()
+      );
+    }
 
-  if (filters.minAttendance) {
-    data = data.filter(
-      (s) =>
-        parseFloat(s.attendance) >=
-        parseFloat(filters.minAttendance)
-    );
-  }
+    if (filters.minAttendance) {
+      data = data.filter(
+        (s) => Number(s.attendance) >= Number(filters.minAttendance)
+      );
+    }
 
-  if (filters.feeDue === "yes") {
-    data = data.filter(
-      (s) => Number(s.fee_due) > 0
-    );
-  }
+    if (filters.feeDue === "yes") {
+      data = data.filter((s) => Number(s.fee_due) > 0);
+    }
 
-  if (filters.feeDue === "no") {
-    data = data.filter(
-      (s) => Number(s.fee_due) === 0
-    );
-  }
+    if (filters.feeDue === "no") {
+      data = data.filter((s) => Number(s.fee_due) === 0);
+    }
 
-  setFilteredStudents(data);
-}, [filters, students]);
+    setFilteredStudents(data);
+    setPage(1);
+  }, [filters, students]);
 
-  /* Unique class list */
+  const totalPages = Math.ceil(total / limit);
+
   const classOptions = [...new Set(students.map((s) => s.class_name))];
 
   return (
@@ -118,10 +115,9 @@ useEffect(() => {
             Students List
           </h2>
 
-          {/* 🔥 Super Admin Filters */}
+          {/* Filters */}
           {isSuperAdmin && (
             <div className="bg-white shadow rounded-xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Class */}
               <select
                 className="border rounded px-3 py-2"
                 value={filters.class}
@@ -137,7 +133,6 @@ useEffect(() => {
                 ))}
               </select>
 
-              {/* Status */}
               <select
                 className="border rounded px-3 py-2"
                 value={filters.status}
@@ -151,7 +146,6 @@ useEffect(() => {
                 <option value="graduate">Doing Well</option>
               </select>
 
-              {/* Grade */}
               <input
                 type="text"
                 placeholder="Grade (A/B/C)"
@@ -162,18 +156,19 @@ useEffect(() => {
                 }
               />
 
-              {/* Attendance */}
               <input
                 type="number"
                 placeholder="Min Attendance %"
                 className="border rounded px-3 py-2"
                 value={filters.minAttendance}
                 onChange={(e) =>
-                  setFilters({ ...filters, minAttendance: e.target.value })
+                  setFilters({
+                    ...filters,
+                    minAttendance: e.target.value,
+                  })
                 }
               />
 
-              {/* Fee Due */}
               <select
                 className="border rounded px-3 py-2"
                 value={filters.feeDue}
@@ -204,7 +199,7 @@ useEffect(() => {
 
               <tbody>
                 {filteredStudents.map((s) => {
-                  const riskKey = s.risk_level?.toLowerCase()?.trim();
+                  const riskKey = s.risk_level?.toLowerCase();
 
                   return (
                     <tr key={s.id} className="border-b hover:bg-blue-50">
@@ -215,9 +210,10 @@ useEffect(() => {
                       <td className="px-6 py-3">₹{s.fee_due}</td>
                       <td className="px-6 py-3">
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${RISK_BADGE_CLASSES[riskKey] ||
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            RISK_BADGE_CLASSES[riskKey] ||
                             "bg-gray-100 text-gray-600"
-                            }`}
+                          }`}
                         >
                           {RISK_LABELS[riskKey] || "Unknown"}
                         </span>
@@ -232,13 +228,56 @@ useEffect(() => {
                       colSpan="6"
                       className="text-center py-6 text-gray-500"
                     >
-                      No students match the filters
+                      No students found
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-sm text-gray-600">
+                Page {page} of {totalPages}
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(1)}
+                  className="px-3 py-1 rounded border disabled:opacity-50"
+                >
+                  First
+                </button>
+
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                  className="px-3 py-1 rounded border disabled:opacity-50"
+                >
+                  Prev
+                </button>
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-3 py-1 rounded border disabled:opacity-50"
+                >
+                  Next
+                </button>
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(totalPages)}
+                  className="px-3 py-1 rounded border disabled:opacity-50"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

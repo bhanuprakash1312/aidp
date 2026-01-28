@@ -25,8 +25,10 @@ def get_db():
 def get_students(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
+    page: int = 1,
+    limit: int = 10,
 ):
-    print("🔥 NEW STUDENTS ROUTE HIT 🔥")
+    offset = (page - 1) * limit
 
     query = (
         db.query(
@@ -44,25 +46,40 @@ def get_students(
         )
     )
 
+    # 🔐 Admin → only assigned class
     if current_user["role"] == "admin":
         query = query.filter(
-            Student.class_name == current_user.class_assigned
+            Student.class_name == current_user["class_assigned"]
         )
 
-    results = query.all()
+    # ✅ Total count (before pagination)
+    total = query.count()
 
-    return [
-        {
-            "id": r.id,
-            "name": r.name,
-            "class_name": r.class_name,
-            "attendance": r.attendance,
-            "grade": r.grade,
-            "fee_due": r.fee_due,
-            "risk_level": r.risk_level or "enrolled",
-        }
-        for r in results
-    ]
+    # ✅ Apply pagination
+    results = (
+        query
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return {
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "data": [
+            {
+                "id": r.id,
+                "name": r.name,
+                "class_name": r.class_name,
+                "attendance": r.attendance,
+                "grade": r.grade,
+                "fee_due": r.fee_due,
+                "risk_level": r.risk_level or "enrolled",
+            }
+            for r in results
+        ]
+    }
 
 @router.post("/upload-excel")
 def upload_students(
