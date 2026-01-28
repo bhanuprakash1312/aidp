@@ -21,48 +21,48 @@ def get_db():
 # @router.get("/", response_model=list[schemas.StudentOut])
 # def read_students(db: Session = Depends(get_db)):
 #     return crud.get_student(db=db)
-# @router.get("/")
-# def get_students(
-#     db: Session = Depends(get_db),
-#     current_user = Depends(get_current_user),
-# ):
-#     print("🔥 NEW STUDENTS ROUTE HIT 🔥")
+@router.get("/")
+def get_students(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    print("🔥 NEW STUDENTS ROUTE HIT 🔥")
 
-#     query = (
-#         db.query(
-#             Student.id,
-#             Student.name,
-#             Student.class_name,
-#             Student.attendance,
-#             Student.grade,
-#             Student.fee_due,
-#             RiskHistory.risk_level,
-#         )
-#         .outerjoin(
-#             RiskHistory,
-#             RiskHistory.student_id == Student.id
-#         )
-#     )
+    query = (
+        db.query(
+            Student.id,
+            Student.name,
+            Student.class_name,
+            Student.attendance,
+            Student.grade,
+            Student.fee_due,
+            RiskHistory.risk_level,
+        )
+        .outerjoin(
+            RiskHistory,
+            RiskHistory.student_id == Student.id
+        )
+    )
 
-#     if current_user.role == "admin":
-#         query = query.filter(
-#             Student.class_name == current_user.class_assigned
-#         )
+    if current_user.role == "admin":
+        query = query.filter(
+            Student.class_name == current_user.class_assigned
+        )
 
-#     results = query.all()
+    results = query.all()
 
-#     return [
-#         {
-#             "id": r.id,
-#             "name": r.name,
-#             "class_name": r.class_name,
-#             "attendance": r.attendance,
-#             "grade": r.grade,
-#             "fee_due": r.fee_due,
-#             "risk_level": r.risk_level or "enrolled",
-#         }
-#         for r in results
-#     ]
+    return [
+        {
+            "id": r.id,
+            "name": r.name,
+            "class_name": r.class_name,
+            "attendance": r.attendance,
+            "grade": r.grade,
+            "fee_due": r.fee_due,
+            "risk_level": r.risk_level or "enrolled",
+        }
+        for r in results
+    ]
 
 @router.post("/upload-excel")
 def upload_students(
