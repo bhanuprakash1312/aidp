@@ -20,20 +20,18 @@ const RISK_BADGE_CLASSES = {
 
 export default function StudentsPage() {
   const { user } = useAuth();
+  const isSuperAdmin = user?.role === "super_admin";
 
   const [students, setStudents] = useState([]);
-  const [filteredStudents, setFilteredStudents] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  /* Pagination state */
+  /* Pagination */
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
 
   const totalPages = Math.ceil(total / limit);
   const PAGE_WINDOW = 10;
-
-  const isSuperAdmin = user?.role === "super_admin";
 
   /* Filters */
   const [filters, setFilters] = useState({
@@ -44,7 +42,7 @@ export default function StudentsPage() {
     feeDue: "",
   });
 
-  /* Fetch students (backend pagination) */
+  /* 🔁 Fetch students (REPLACES list like Risk page) */
   const fetchStudents = async () => {
     try {
       const res = await api.get("/students/", {
@@ -52,12 +50,10 @@ export default function StudentsPage() {
       });
 
       setStudents(res.data?.data || []);
-      setFilteredStudents(res.data?.data || []);
       setTotal(res.data?.total || 0);
     } catch (err) {
       console.error("Failed to fetch students", err);
       setStudents([]);
-      setFilteredStudents([]);
       setTotal(0);
     }
   };
@@ -66,55 +62,37 @@ export default function StudentsPage() {
     fetchStudents();
   }, [page]);
 
-  /* Apply filters (client-side) */
-  useEffect(() => {
-    let data = [...students];
+  /* ✅ Apply filters ONLY on current page */
+  const filteredStudents = students.filter((s) => {
+    if (filters.class && s.class_name !== filters.class) return false;
+    if (
+      filters.status &&
+      !s.risk_level?.toLowerCase().includes(filters.status)
+    )
+      return false;
+    if (
+      filters.grade &&
+      s.grade?.toLowerCase().trim() !== filters.grade.toLowerCase().trim()
+    )
+      return false;
+    if (
+      filters.minAttendance &&
+      Number(s.attendance) < Number(filters.minAttendance)
+    )
+      return false;
+    if (filters.feeDue === "yes" && Number(s.fee_due) === 0) return false;
+    if (filters.feeDue === "no" && Number(s.fee_due) > 0) return false;
 
-    if (filters.class) {
-      data = data.filter((s) => s.class_name === filters.class);
-    }
+    return true;
+  });
 
-    if (filters.status) {
-      data = data.filter((s) =>
-        s.risk_level?.toLowerCase().includes(filters.status)
-      );
-    }
-
-    if (filters.grade) {
-      data = data.filter(
-        (s) =>
-          s.grade?.toLowerCase().trim() ===
-          filters.grade.toLowerCase().trim()
-      );
-    }
-
-    if (filters.minAttendance) {
-      data = data.filter(
-        (s) => Number(s.attendance) >= Number(filters.minAttendance)
-      );
-    }
-
-    if (filters.feeDue === "yes") {
-      data = data.filter((s) => Number(s.fee_due) > 0);
-    }
-
-    if (filters.feeDue === "no") {
-      data = data.filter((s) => Number(s.fee_due) === 0);
-    }
-
-    setFilteredStudents(data);
-    setPage(1); // reset to first page after filter
-  }, [filters, students]);
-
-  /* Pagination window logic */
+  /* Pagination window (same as Risk page) */
   const currentWindow = Math.floor((page - 1) / PAGE_WINDOW);
   const startPage = currentWindow * PAGE_WINDOW + 1;
   const endPage = Math.min(startPage + PAGE_WINDOW - 1, totalPages);
 
   const pageNumbers = [];
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
-  }
+  for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
 
   const classOptions = [...new Set(students.map((s) => s.class_name))];
 
@@ -234,7 +212,7 @@ export default function StudentsPage() {
                               "bg-gray-100 text-gray-600"
                             }`}
                           >
-                            {RISK_LABELS[riskKey] || "Unknown"}
+                            {RISK_LABELS[riskKey]}
                           </span>
                         </td>
                       </tr>
@@ -242,10 +220,7 @@ export default function StudentsPage() {
                   })
                 ) : (
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="text-center py-6 text-gray-500"
-                    >
+                    <td colSpan="6" className="text-center py-6 text-gray-500">
                       No students found
                     </td>
                   </tr>
@@ -254,10 +229,10 @@ export default function StudentsPage() {
             </table>
           </div>
 
-          {/* Pagination (10 pages + arrows) */}
+          {/* Pagination (same as Risk page) */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 <button
                   disabled={startPage === 1}
                   onClick={() => setPage(startPage - 1)}
@@ -270,10 +245,10 @@ export default function StudentsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`px-3 py-1 rounded border text-sm transition ${
+                    className={`px-3 py-1 rounded border ${
                       page === p
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
+                        ? "bg-blue-600 text-white"
+                        : "bg-white hover:bg-gray-100"
                     }`}
                   >
                     {p}
