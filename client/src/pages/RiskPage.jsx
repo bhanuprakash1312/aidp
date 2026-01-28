@@ -26,17 +26,27 @@ const RISK_DOT = {
 export default function RiskPage() {
   const [risks, setRisks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-   
+
   useEffect(() => {
     // Call both APIs at once
-    api.get("/")
-      .then((res) => console.log(res.data))
-      .catch((err) => console.error(err));
-
     api.get("/risk/risk")
       .then((res) => setRisks(res.data))
       .catch(() => setRisks([]));
   }, []); // Still only runs once after the website is opened
+
+  const handleEvaluate = async () => {
+    try {
+      setEvaluating(true);
+      await api.post("/risk/evaluate");   // 👈 backend POST
+      const res = await api.get("/risk/risk"); // 👈 reuse existing logic
+      setRisks(res.data);
+    } catch (err) {
+      console.error("Risk evaluation failed", err);
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
 
   const statusBadge = (riskLevel) => {
     const key = riskLevel?.toLowerCase()?.trim() || "enrolled";
@@ -66,6 +76,25 @@ export default function RiskPage() {
 
         {/* Content */}
         <main className="flex-1 p-6 overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-blue-700">
+              Risk Flags
+            </h2>
+
+            <button
+              onClick={handleEvaluate}
+              disabled={evaluating}
+              className={`
+      px-4 py-2 rounded-md text-white text-sm font-medium
+      transition
+      ${evaluating
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"}
+    `}
+            >
+              {evaluating ? "Evaluating..." : "Evaluate Risk"}
+            </button>
+          </div>
           <h2 className="text-xl font-semibold mb-4 text-blue-700">
             Risk Flags
           </h2>

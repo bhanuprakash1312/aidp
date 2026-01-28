@@ -31,19 +31,19 @@ export default function UploadStudent() {
       setLoading(false);
     }
   };
-  const Evaluate = async () => {
-    try{
-      api.post("/risk/evaluate");
-      setMessage("Evaluation successful");
-      setStatus("success");
-    }
-    catch(err){
-      console.log(err);
-      setStatus("error");
-      setMessage("Evaluation failed");
-    }
+  // const Evaluate = async () => {
+  //   try{
+  //     api.post("/risk/evaluate");
+  //     setMessage("Evaluation successful");
+  //     setStatus("success");
+  //   }
+  //   catch(err){
+  //     console.log(err);
+  //     setStatus("error");
+  //     setMessage("Evaluation failed");
+  //   }
 
-  }
+  // }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
@@ -91,7 +91,7 @@ export default function UploadStudent() {
           {loading ? "Uploading..." : "Upload File"}
         </button>
 
-        <button
+        {/* <button
           onClick={Evaluate}
           disabled={loading}
           className={`w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-white transition
@@ -103,7 +103,7 @@ export default function UploadStudent() {
         >
            Evaluate
           {loading ? "Evaluating..." : "Evaluate"}
-        </button>
+        </button> */}
 
         {/* Message */}
         {message && (
