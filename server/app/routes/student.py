@@ -90,28 +90,7 @@ def upload_students(
             db.add(student)
             db.commit()   # 👈 COMMIT PER ROW (IMPORTANT)
 
-        # uploading students to risk
-            students = db.query(Student).all()
-            result = []
-
-            for s in students:
-                risk = calculate_risk(s.attendance,s.fee_due,s.grade)
-                history = RiskHistory(
-                    student_id=s.id,
-                    risk_level=risk,
-                    class_name = s.class_name,
-                    attendance=s.attendance,
-                    grade=s.grade,
-                    fee_due = s.fee_due)
-                db.add(history)
-                result.append({
-                    "student_id": s.id,
-                    "name": s.name,
-                    "risk_level": risk
-                })
-
-                db.commit()
-
+        
 
         return {"detail": "Upload finished"}
 
