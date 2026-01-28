@@ -3,13 +3,14 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
-/* Labels */
+/* Parent-friendly labels */
 const RISK_TEXT = {
   dropout: "Needs Immediate Attention",
   enrolled: "On Track (Needs Monitoring)",
   graduate: "Doing Well",
 };
 
+/* Styles */
 const RISK_STYLE = {
   dropout: "text-red-700",
   enrolled: "text-yellow-700",
@@ -25,34 +26,48 @@ const RISK_DOT = {
 export default function RiskPage() {
   const [risks, setRisks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  /* ✅ Pagination state */
+  /* Pagination state */
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
 
   const totalPages = Math.ceil(total / limit);
 
-  /* ✅ Optimized fetch */
+  /* Fetch risks (optimized & safe) */
   const fetchRisks = async () => {
-    const res = await api.get("/risk/risk", {
-      params: { page, limit },
-    });
+    try {
+      const res = await api.get("/risk/risk", {
+        params: { page, limit },
+      });
 
-    setRisks(res.data?.data || []);
-    setTotal(res.data?.total || 0);
+      setRisks(res.data?.data || []);
+      setTotal(res.data?.total || 0);
+    } catch (err) {
+      console.error("Failed to fetch risks", err);
+      setRisks([]);
+      setTotal(0);
+    }
   };
 
   useEffect(() => {
     fetchRisks();
   }, [page]);
 
+  /* Generate page numbers */
+  const getPageNumbers = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   const statusBadge = (riskLevel) => {
     const key = riskLevel?.toLowerCase()?.trim() || "enrolled";
 
     return (
-      <span className={`flex items-center gap-2 ${RISK_STYLE[key]}`}>
+      <span className={`flex items-center justify-center gap-2 ${RISK_STYLE[key]}`}>
         <span className={`w-3 h-3 rounded-full ${RISK_DOT[key]}`} />
         {RISK_TEXT[key]}
       </span>
@@ -114,45 +129,25 @@ export default function RiskPage() {
             </table>
           </div>
 
-          {/* ✅ Pagination */}
+          {/* Old-style pagination (page numbers) */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-sm text-gray-600">
-                Page {page} of {totalPages}
-              </span>
-
-              <div className="flex gap-2">
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage(1)}
-                  className="px-3 py-1 border rounded disabled:opacity-50"
-                >
-                  First
-                </button>
-
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="px-3 py-1 border rounded disabled:opacity-50"
-                >
-                  Prev
-                </button>
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-3 py-1 border rounded disabled:opacity-50"
-                >
-                  Next
-                </button>
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage(totalPages)}
-                  className="px-3 py-1 border rounded disabled:opacity-50"
-                >
-                  Last
-                </button>
+            <div className="flex justify-center mt-6">
+              <div className="flex gap-2 flex-wrap">
+                {getPageNumbers().map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`px-3 py-1 rounded border text-sm transition
+                      ${
+                        page === p
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }
+                    `}
+                  >
+                    {p}
+                  </button>
+                ))}
               </div>
             </div>
           )}
