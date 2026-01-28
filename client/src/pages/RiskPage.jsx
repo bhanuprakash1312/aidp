@@ -39,7 +39,7 @@ export default function RiskPage() {
         setTotal(res.data.total);
       })
       .catch(() => setRisks([]));
-  }, []); // Still only runs once after the website is opened
+  }, [page]); // Still only runs once after the website is opened
   const totalPages = Math.ceil(total / limit);
 
   const handleEvaluate = async () => {
