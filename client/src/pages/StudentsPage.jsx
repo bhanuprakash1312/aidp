@@ -36,7 +36,7 @@ export default function StudentsPage() {
 
   useEffect(() => {
     api
-      .get("/students")
+      .get("/students/")
       .then((res) => {
         setStudents(res.data);
         setFilteredStudents(res.data);
