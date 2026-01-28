@@ -153,6 +153,34 @@ export default function UploadStudent() {
           </p>
         </div>
 
+        {/* ℹ️ Excel Requirements */}
+        <div className="mb-5 rounded-lg bg-blue-50 border border-blue-200 p-4 text-sm text-blue-800">
+          <div className="font-semibold mb-1">
+            Excel Requirements
+          </div>
+
+          <div className="mb-2">
+            Your Excel file must include the following columns:
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            {REQUIRED_COLUMNS.map((col) => (
+              <span
+                key={col}
+                className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-mono"
+              >
+                {col}
+              </span>
+            ))}
+          </div>
+
+          <ul className="list-disc list-inside space-y-1">
+            <li>Column names are case-insensitive (Name or name both work)</li>
+            <li>Extra or missing columns are not allowed</li>
+            <li>Attendance and Fee Due must be numeric</li>
+          </ul>
+        </div>
+
         {/* File Input */}
         <label className="flex flex-col items-center justify-center border-2 border-dashed border-blue-300 rounded-xl p-6 cursor-pointer hover:bg-blue-50 transition">
           <FileSpreadsheet className="w-10 h-10 text-blue-500 mb-2" />
