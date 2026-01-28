@@ -1,6 +1,6 @@
 import { dotSpinner } from "ldrs";
 
-dotSpinner.register();
+
 
 const Loader = ({ size = 40, color = "black" }) => {
   return (

@@ -33,7 +33,7 @@ export default function UploadStudent() {
   };
   const Evaluate = async () => {
     try{
-      api.post("/risk")
+      api.post("/risk/evaluate");
       setMessage("Evaluation successful");
       setStatus("success");
     }
@@ -101,8 +101,8 @@ export default function UploadStudent() {
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
         >
-          <Evaluate className="w-5 h-5" />
-          {loading ? "Uploading..." : "Upload File"}
+           Evaluate
+          {loading ? "Evaluating..." : "Evaluate"}
         </button>
 
         {/* Message */}

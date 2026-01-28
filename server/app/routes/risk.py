@@ -15,7 +15,7 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/")
+@router.post("/evaluate")
 def get_risk_students(db: Session = Depends(get_db)):
 
             students = db.query(Student).all()
