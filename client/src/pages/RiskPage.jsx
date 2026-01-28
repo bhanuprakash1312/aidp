@@ -26,6 +26,7 @@ const RISK_DOT = {
 export default function RiskPage() {
   const [risks, setRisks] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [evaluating, setEvaluating] = useState(false);
 
   useEffect(() => {
     // Call both APIs at once
