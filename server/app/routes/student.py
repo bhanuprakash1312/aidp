@@ -114,7 +114,7 @@ def upload_students(
                     name=str(row["name"]).strip(),
                     class_name=str(row["class_name"]).strip(),
                     attendance=float(row["attendance"]),
-                    grade=str(row["grade"]).strip(),   # ✅ FIXED
+                    grade=float(row["grade"]),   # ✅ FIXED
                     fee_due=float(row["fee_due"]),
                 )
 
