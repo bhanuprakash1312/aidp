@@ -1,12 +1,31 @@
 import { useState } from "react";
 import api from "../services/api";
-import { Upload, FileSpreadsheet, CheckCircle, XCircle } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function UploadStudent() {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState(""); // success | error
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  // 🔹 Convert backend error to user-friendly message
+  const formatError = (detail) => {
+    if (!detail) return "Upload failed. Please check the Excel file.";
+
+    if (detail.includes("name"))
+      return "Missing required column: name";
+    if (detail.includes("class_name"))
+      return "Missing required column: class_name";
+    if (detail.includes("attendance"))
+      return "Missing required column: attendance";
+    if (detail.includes("fee_due"))
+      return "Missing required column: fee_due";
+
+    return detail;
+  };
 
   const handleUpload = async () => {
     if (!file) {
@@ -21,32 +40,34 @@ export default function UploadStudent() {
     try {
       setLoading(true);
       setMessage("");
+      setStatus("");
+
       const res = await api.post("/students/upload-excel", formData);
+
       setMessage(res.data.detail || "Upload successful");
       setStatus("success");
     } catch (err) {
-      setMessage(err.response?.data?.detail || "Upload failed");
+      const backendError = err.response?.data?.detail;
+      setMessage(formatError(backendError));
       setStatus("error");
     } finally {
       setLoading(false);
     }
   };
-  // const Evaluate = async () => {
-  //   try{
-  //     api.post("/risk/evaluate");
-  //     setMessage("Evaluation successful");
-  //     setStatus("success");
-  //   }
-  //   catch(err){
-  //     console.log(err);
-  //     setStatus("error");
-  //     setMessage("Evaluation failed");
-  //   }
 
-  // }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 relative">
+
+        {/* 🔙 Back to Dashboard */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="absolute top-4 left-4 flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
@@ -90,20 +111,6 @@ export default function UploadStudent() {
           <Upload className="w-5 h-5" />
           {loading ? "Uploading..." : "Upload File"}
         </button>
-
-        {/* <button
-          onClick={Evaluate}
-          disabled={loading}
-          className={`w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-white transition
-            ${
-              loading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
-        >
-           Evaluate
-          {loading ? "Evaluating..." : "Evaluate"}
-        </button> */}
 
         {/* Message */}
         {message && (
