@@ -25,9 +25,13 @@ export default function StudentsPage() {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  /* Pagination state */
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
+
+  const totalPages = Math.ceil(total / limit);
+  const PAGE_WINDOW = 10;
 
   const isSuperAdmin = user?.role === "super_admin";
 
@@ -41,20 +45,26 @@ export default function StudentsPage() {
   });
 
   /* Fetch students (backend pagination) */
-  useEffect(() => {
-    api
-      .get("/students/", { params: { page, limit } })
-      .then((res) => {
-        setStudents(res.data.data);
-        setFilteredStudents(res.data.data);
-        setTotal(res.data.total);
-      })
-      .catch(() => {
-        setStudents([]);
-        setFilteredStudents([]);
-        setTotal(0);
+  const fetchStudents = async () => {
+    try {
+      const res = await api.get("/students/", {
+        params: { page, limit },
       });
-  }, [page, limit]);
+
+      setStudents(res.data?.data || []);
+      setFilteredStudents(res.data?.data || []);
+      setTotal(res.data?.total || 0);
+    } catch (err) {
+      console.error("Failed to fetch students", err);
+      setStudents([]);
+      setFilteredStudents([]);
+      setTotal(0);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [page]);
 
   /* Apply filters (client-side) */
   useEffect(() => {
@@ -93,10 +103,18 @@ export default function StudentsPage() {
     }
 
     setFilteredStudents(data);
-    setPage(1);
+    setPage(1); // reset to first page after filter
   }, [filters, students]);
 
-  const totalPages = Math.ceil(total / limit);
+  /* Pagination window logic */
+  const currentWindow = Math.floor((page - 1) / PAGE_WINDOW);
+  const startPage = currentWindow * PAGE_WINDOW + 1;
+  const endPage = Math.min(startPage + PAGE_WINDOW - 1, totalPages);
+
+  const pageNumbers = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
 
   const classOptions = [...new Set(students.map((s) => s.class_name))];
 
@@ -198,31 +216,31 @@ export default function StudentsPage() {
               </thead>
 
               <tbody>
-                {filteredStudents.map((s) => {
-                  const riskKey = s.risk_level?.toLowerCase();
+                {filteredStudents.length > 0 ? (
+                  filteredStudents.map((s) => {
+                    const riskKey = s.risk_level?.toLowerCase() || "enrolled";
 
-                  return (
-                    <tr key={s.id} className="border-b hover:bg-blue-50">
-                      <td className="px-6 py-3">{s.name}</td>
-                      <td className="px-6 py-3">{s.class_name}</td>
-                      <td className="px-6 py-3">{s.attendance}%</td>
-                      <td className="px-6 py-3">{s.grade}</td>
-                      <td className="px-6 py-3">₹{s.fee_due}</td>
-                      <td className="px-6 py-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            RISK_BADGE_CLASSES[riskKey] ||
-                            "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {RISK_LABELS[riskKey] || "Unknown"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {filteredStudents.length === 0 && (
+                    return (
+                      <tr key={s.id} className="border-b hover:bg-blue-50">
+                        <td className="px-6 py-3">{s.name}</td>
+                        <td className="px-6 py-3">{s.class_name}</td>
+                        <td className="px-6 py-3">{s.attendance}%</td>
+                        <td className="px-6 py-3">{s.grade}</td>
+                        <td className="px-6 py-3">₹{s.fee_due}</td>
+                        <td className="px-6 py-3">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              RISK_BADGE_CLASSES[riskKey] ||
+                              "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {RISK_LABELS[riskKey] || "Unknown"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
                   <tr>
                     <td
                       colSpan="6"
@@ -236,44 +254,38 @@ export default function StudentsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
+          {/* Pagination (10 pages + arrows) */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-sm text-gray-600">
-                Page {page} of {totalPages}
-              </span>
-
-              <div className="flex gap-2">
+            <div className="flex justify-center mt-6">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
-                  disabled={page === 1}
-                  onClick={() => setPage(1)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
+                  disabled={startPage === 1}
+                  onClick={() => setPage(startPage - 1)}
+                  className="px-3 py-1 border rounded disabled:opacity-40"
                 >
-                  First
+                  ←
                 </button>
 
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Prev
-                </button>
+                {pageNumbers.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`px-3 py-1 rounded border text-sm transition ${
+                      page === p
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
 
                 <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
+                  disabled={endPage === totalPages}
+                  onClick={() => setPage(endPage + 1)}
+                  className="px-3 py-1 border rounded disabled:opacity-40"
                 >
-                  Next
-                </button>
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage(totalPages)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Last
+                  →
                 </button>
               </div>
             </div>
