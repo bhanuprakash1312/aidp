@@ -1,55 +1,125 @@
 import { useState } from "react";
 import api from "../services/api";
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import {
+  Upload,
+  FileSpreadsheet,
+  CheckCircle,
+  XCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
+
+/* ✅ Required Excel schema */
+const REQUIRED_COLUMNS = [
+  "name",
+  "class_name",
+  "attendance",
+  "grade",
+  "fee_due",
+];
 
 export default function UploadStudent() {
   const [file, setFile] = useState(null);
-  const [message, setMessage] = useState("");
   const [status, setStatus] = useState(""); // success | error
   const [loading, setLoading] = useState(false);
 
+  const [errorContent, setErrorContent] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
   const navigate = useNavigate();
 
-  // 🔹 Convert backend error to user-friendly message
-  const formatError = (detail) => {
-    if (!detail) return "Upload failed. Please check the Excel file.";
+  /* 🔍 Validate Excel headers BEFORE upload */
+  const validateExcelHeaders = async (file) => {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    if (detail.includes("name"))
-      return "Missing required column: name";
-    if (detail.includes("class_name"))
-      return "Missing required column: class_name";
-    if (detail.includes("attendance"))
-      return "Missing required column: attendance";
-    if (detail.includes("fee_due"))
-      return "Missing required column: fee_due";
+    const headers = XLSX.utils
+      .sheet_to_json(sheet, { header: 1 })[0]
+      .map((h) => h?.toString().trim().toLowerCase());
 
-    return detail;
+    const missing = REQUIRED_COLUMNS.filter(
+      (col) => !headers.includes(col)
+    );
+
+    const extra = headers.filter(
+      (col) => !REQUIRED_COLUMNS.includes(col)
+    );
+
+    return { missing, extra };
   };
 
   const handleUpload = async () => {
+    setStatus("");
+    setErrorContent(null);
+    setSuccessMessage("");
+
     if (!file) {
-      setMessage("Please select an Excel file");
       setStatus("error");
+      setErrorContent({
+        title: "No file selected",
+        description: "Please select an Excel file to upload.",
+      });
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    /* ✅ Frontend schema validation */
+    const { missing, extra } = await validateExcelHeaders(file);
 
+    if (missing.length > 0 || extra.length > 0) {
+      setStatus("error");
+      setErrorContent({
+        title: "Invalid Excel format",
+        description: (
+          <>
+            <div>
+              <strong>Required columns:</strong>{" "}
+              {REQUIRED_COLUMNS.join(", ")}
+            </div>
+
+            {missing.length > 0 && (
+              <div className="mt-1">
+                <strong>Missing columns:</strong>{" "}
+                <span className="text-red-700">
+                  {missing.join(", ")}
+                </span>
+              </div>
+            )}
+
+            {extra.length > 0 && (
+              <div className="mt-1">
+                <strong>Extra columns found:</strong>{" "}
+                <span className="text-yellow-700">
+                  {extra.join(", ")}
+                </span>
+              </div>
+            )}
+          </>
+        ),
+      });
+      return; // ⛔ stop upload
+    }
+
+    /* ✅ Upload only if valid */
     try {
       setLoading(true);
-      setMessage("");
-      setStatus("");
+
+      const formData = new FormData();
+      formData.append("file", file);
 
       const res = await api.post("/students/upload-excel", formData);
 
-      setMessage(res.data.detail || "Upload successful");
       setStatus("success");
+      setSuccessMessage(res.data?.detail || "Upload successful");
     } catch (err) {
-      const backendError = err.response?.data?.detail;
-      setMessage(formatError(backendError));
       setStatus("error");
+      setErrorContent({
+        title: "Upload failed",
+        description:
+          err.response?.data?.detail ||
+          "Server error while uploading file.",
+      });
     } finally {
       setLoading(false);
     }
@@ -112,22 +182,22 @@ export default function UploadStudent() {
           {loading ? "Uploading..." : "Upload File"}
         </button>
 
-        {/* Message */}
-        {message && (
-          <div
-            className={`mt-4 flex items-center gap-2 justify-center text-sm font-medium p-3 rounded-lg
-              ${
-                status === "success"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-          >
-            {status === "success" ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
+        {/* ❌ Error Message */}
+        {status === "error" && errorContent && (
+          <div className="mt-4 p-4 rounded-lg bg-red-100 text-red-700 text-sm">
+            <div className="font-semibold mb-1 flex items-center gap-2">
               <XCircle className="w-5 h-5" />
-            )}
-            {message}
+              {errorContent.title}
+            </div>
+            <div className="ml-7">{errorContent.description}</div>
+          </div>
+        )}
+
+        {/* ✅ Success Message */}
+        {status === "success" && successMessage && (
+          <div className="mt-4 flex items-center gap-2 justify-center text-sm font-medium p-3 rounded-lg bg-green-100 text-green-700">
+            <CheckCircle className="w-5 h-5" />
+            {successMessage}
           </div>
         )}
       </div>
