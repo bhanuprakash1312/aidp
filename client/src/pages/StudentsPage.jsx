@@ -80,7 +80,7 @@ export default function StudentsPage() {
       Number(s.attendance) < Number(filters.minAttendance)
     ) return false;
 
-    if (filters.feeDue === "yes" && Number(s.fee_due) === 0) return false;
+    if (filters.feeDue === "yes" && Number(s.fee_due) <= 0) return false;
     if (filters.feeDue === "no" && Number(s.fee_due) > 0) return false;
 
     return true;
