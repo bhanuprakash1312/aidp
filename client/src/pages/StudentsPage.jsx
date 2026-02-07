@@ -72,9 +72,9 @@ export default function StudentsPage() {
       return false;
     if (
       filters.grade &&
-      s.grade?.toUpperCase().trim() !== filters.grade.toUpperCase().trim()
-    )
-      return false;
+      Number(s.grade) < Number(filters.grade)
+    ) return false;
+
     if (
       filters.minAttendance &&
       Number(s.attendance) < Number(filters.minAttendance)
@@ -143,14 +143,16 @@ export default function StudentsPage() {
               </select>
 
               <input
-                type="text"
-                placeholder="Grade (A/B/C)"
+                type="number"
+                step="0.1"
+                placeholder="Min Grade"
                 className="border rounded px-3 py-2"
                 value={filters.grade}
                 onChange={(e) =>
-                  setFilters({ ...filters, grade: e.target.value })
+                  setFilters({ ...filters, grade: Number(e.target.value) })
                 }
               />
+
 
               <input
                 type="number"
@@ -245,8 +247,8 @@ export default function StudentsPage() {
                     key={p}
                     onClick={() => setPage(p)}
                     className={`px-3 py-1 rounded border ${page === p
-                        ? "bg-blue-600 text-white"
-                        : "bg-white hover:bg-gray-100"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white hover:bg-gray-100"
                       }`}
                   >
                     {p}
