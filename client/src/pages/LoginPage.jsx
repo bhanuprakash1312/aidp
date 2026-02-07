@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,7 +17,9 @@ export default function LoginPage() {
       login(email, password);
       setLoading(false);
     } catch (err) {
-      console.error("Login failed:", err);
+      if(err.status === 401) {
+        setError("Invalid email or password");
+      }
     } 
   };
 
@@ -94,6 +97,11 @@ export default function LoginPage() {
   >
     Login
   </button>
+  {error && (
+    <p className="text-red-500 text-sm mt-4 text-center">
+      {error}
+    </p>
+  )}
 </form>
 
 
