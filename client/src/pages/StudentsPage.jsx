@@ -35,7 +35,7 @@ export default function StudentsPage() {
 
   /* Filters */
   const [filters, setFilters] = useState({
-    class: "",
+    className: "",
     status: "",
     grade: "",
     minAttendance: "",
@@ -64,7 +64,7 @@ export default function StudentsPage() {
 
   /* ✅ Apply filters ONLY on current page */
   const filteredStudents = students.filter((s) => {
-    if (filters.class && s.class_name !== filters.class) return false;
+    if (filters.className && s.class_name !== filters.className) return false;
     if (
       filters.status &&
       !s.risk_level?.toLowerCase().includes(filters.status)
@@ -72,14 +72,14 @@ export default function StudentsPage() {
       return false;
     if (
       filters.grade &&
-      s.grade?.toLowerCase().trim() !== filters.grade.toLowerCase().trim()
+      s.grade?.toUpperCase().trim() !== filters.grade.toUpperCase().trim()
     )
       return false;
     if (
       filters.minAttendance &&
       Number(s.attendance) < Number(filters.minAttendance)
-    )
-      return false;
+    ) return false;
+
     if (filters.feeDue === "yes" && Number(s.fee_due) === 0) return false;
     if (filters.feeDue === "no" && Number(s.fee_due) > 0) return false;
 
@@ -116,9 +116,9 @@ export default function StudentsPage() {
             <div className="bg-white shadow rounded-xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <select
                 className="border rounded px-3 py-2"
-                value={filters.class}
+                value={filters.className}
                 onChange={(e) =>
-                  setFilters({ ...filters, class: e.target.value })
+                  setFilters({ ...filters, className: e.target.value })
                 }
               >
                 <option value="">All Classes</option>
@@ -207,10 +207,9 @@ export default function StudentsPage() {
                         <td className="px-6 py-3">₹{s.fee_due}</td>
                         <td className="px-6 py-3">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              RISK_BADGE_CLASSES[riskKey] ||
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${RISK_BADGE_CLASSES[riskKey] ||
                               "bg-gray-100 text-gray-600"
-                            }`}
+                              }`}
                           >
                             {RISK_LABELS[riskKey]}
                           </span>
@@ -245,11 +244,10 @@ export default function StudentsPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`px-3 py-1 rounded border ${
-                      page === p
+                    className={`px-3 py-1 rounded border ${page === p
                         ? "bg-blue-600 text-white"
                         : "bg-white hover:bg-gray-100"
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>
