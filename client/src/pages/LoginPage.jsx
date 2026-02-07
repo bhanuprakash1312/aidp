@@ -10,17 +10,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      login(email, password);
-      setLoading(false);
+      await login(email, password);
+      
     } catch (err) {
       if(err.status === 401) {
         setError("Invalid email or password");
       }
     } 
+    finally{
+      setLoading(false);
+    }
   };
 
   if (loading) {
