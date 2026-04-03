@@ -112,9 +112,9 @@ export default function StudentsPage() {
           </h2>
 
           {/* Filters */}
-          {isSuperAdmin && (
+          
             <div className="bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 border border-white">
-              <select
+              {isSuperAdmin&&(<select
                 className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
                 value={filters.className}
                 onChange={(e) =>
@@ -127,7 +127,7 @@ export default function StudentsPage() {
                     {c}
                   </option>
                 ))}
-              </select>
+              </select>)}
 
               <select
                 className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
@@ -179,7 +179,7 @@ export default function StudentsPage() {
                 <option value="no">No</option>
               </select>
             </div>
-          )}
+      
 
           {/* Table */}
           <div className="overflow-x-auto bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl border border-white">
