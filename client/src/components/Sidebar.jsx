@@ -14,7 +14,7 @@ export default function Sidebar({ isOpen, closeSidebar }) {
       {/* Backdrop for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 md:hidden transition-all duration-300"
           onClick={closeSidebar}
         />
       )}
