@@ -46,16 +46,16 @@ export default function LoginPage() {
   onSubmit={handleSubmit}
   className="
     relative z-10
-    w-96
-    rounded-3xl
-    p-8
-    backdrop-blur-2xl
-    bg-white/5
-    border border-white/10
-    shadow-lg shadow-black/40
+    w-[26rem]
+    rounded-[2rem]
+    p-10
+    backdrop-blur-xl
+    bg-white/10
+    border border-white/20
+    shadow-2xl shadow-indigo-900/40
   "
 >
-  <h2 className="text-3xl font-extrabold mb-2 text-center text-white">
+  <h2 className="text-3xl font-extrabold mb-2 text-center text-white drop-shadow-md">
     Welcome Back
   </h2>
 
@@ -68,9 +68,9 @@ export default function LoginPage() {
     placeholder="Email"
     className="
       w-full p-3 mb-4 rounded-xl
-      bg-white/10 text-white placeholder-gray-400
+      bg-white/10 text-white placeholder-gray-300
       border border-white/20
-      focus:outline-none focus:ring-2 focus:ring-blue-400/60
+      focus:outline-none focus:ring-2 focus:ring-indigo-400/60 focus:bg-white/20 transition-all
     "
     value={email}
     onChange={(e) => setEmail(e.target.value)}
@@ -81,9 +81,9 @@ export default function LoginPage() {
     placeholder="Password"
     className="
       w-full p-3 mb-6 rounded-xl
-      bg-white/10 text-white placeholder-gray-400
+      bg-white/10 text-white placeholder-gray-300
       border border-white/20
-      focus:outline-none focus:ring-2 focus:ring-blue-400/60
+      focus:outline-none focus:ring-2 focus:ring-indigo-400/60 focus:bg-white/20 transition-all
     "
     value={password}
     onChange={(e) => setPassword(e.target.value)}
@@ -92,10 +92,10 @@ export default function LoginPage() {
   <button
     type="submit"
     className="
-      bg-blue-600/80 text-white
-      w-full py-3 rounded-xl font-semibold
-      hover:bg-blue-700/90 transition
-      shadow-md
+      bg-gradient-to-r from-blue-600 to-indigo-600 text-white
+      w-full py-3.5 rounded-xl font-bold tracking-wide
+      hover:from-blue-700 hover:to-indigo-700 transition-all duration-300
+      shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
     "
   >
     Login

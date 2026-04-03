@@ -6,8 +6,8 @@ export default function Sidebar({ isOpen, closeSidebar }) {
 
   const isActive = (path) =>
     location.pathname === path
-      ? "bg-blue-100 text-blue-700 font-semibold"
-      : "text-gray-700 hover:bg-blue-50 hover:text-blue-700";
+      ? "bg-indigo-100 text-indigo-700 font-semibold shadow-sm"
+      : "text-slate-600 hover:bg-indigo-50/80 hover:text-indigo-700";
 
   return (
     <>
@@ -21,8 +21,7 @@ export default function Sidebar({ isOpen, closeSidebar }) {
 
       {/* Sidebar */}
       <div
-        className={`bg-gradient-to-b from-blue-50 to-blue-100
-        border-r border-blue-200 text-gray-800 shadow
+        className={`bg-white/70 backdrop-blur-md border-r border-indigo-100 text-slate-800 shadow-xl
         transform transition-transform duration-300 ease-in-out
         fixed md:relative top-0 left-0
         h-screen md:h-full w-64 z-40
@@ -30,10 +29,10 @@ export default function Sidebar({ isOpen, closeSidebar }) {
         flex flex-col`}
       >
         {/* Mobile Header */}
-        <div className="md:hidden flex justify-between items-center px-4 py-3 border-b border-blue-200 bg-blue-100">
-          <h2 className="text-lg font-bold text-blue-800">Menu</h2>
+        <div className="md:hidden flex justify-between items-center px-4 py-3 border-b border-indigo-100 bg-indigo-50/50 backdrop-blur-md">
+          <h2 className="text-lg font-bold text-indigo-800">Menu</h2>
           <button onClick={closeSidebar}>
-            <X className="w-6 h-6 text-blue-800" />
+            <X className="w-6 h-6 text-indigo-800" />
           </button>
         </div>
 

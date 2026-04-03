@@ -19,7 +19,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="h-screen bg-slate-100 flex flex-col">
+    <div className="h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-cyan-50 flex flex-col text-slate-800">
       {/* Navbar */}
       <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -32,7 +32,7 @@ export default function DashboardPage() {
         />
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-y-auto bg-slate-100">
+        <main className="flex-1 p-6 overflow-y-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-blue-700">
@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
             <button
               onClick={() => navigate("/upload-students")}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               Upload Students
             </button>
@@ -49,7 +49,7 @@ export default function DashboardPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white shadow rounded-xl p-5 flex items-center gap-4">
+            <div className="bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl p-6 flex items-center gap-5 border border-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
               <Users className="text-blue-600 w-10 h-10" />
               <div>
                 <h2 className="text-gray-600">Total Students</h2>
@@ -59,7 +59,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="bg-white shadow rounded-xl p-5 flex items-center gap-4">
+            <div className="bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl p-6 flex items-center gap-5 border border-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
               <TrendingUp className="text-green-500 w-10 h-10" />
               <div>
                 <h2 className="text-gray-600">Average Attendance</h2>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="bg-white shadow rounded-xl p-5 flex items-center gap-4">
+            <div className="bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl p-6 flex items-center gap-5 border border-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
               <AlertTriangle className="text-red-500 w-10 h-10" />
               <div>
                 <h2 className="text-gray-600">At Risk</h2>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Chart */}
-          <div className="mt-10 bg-white shadow rounded-xl p-6">
+          <div className="mt-10 bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl p-6 border border-white">
             <h2 className="text-lg font-semibold mb-4">
               Overall Summary
             </h2>

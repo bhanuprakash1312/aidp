@@ -79,7 +79,7 @@ export default function RiskPage() {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-cyan-50 flex flex-col text-slate-800">
       <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden">
@@ -94,9 +94,9 @@ export default function RiskPage() {
           </h2>
 
           {/* Table */}
-          <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
+          <div className="overflow-x-auto bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl border border-white">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-200">
+              <thead className="bg-indigo-50/80 text-indigo-800 border-b border-indigo-100 font-medium">
                 <tr>
                   <th className="p-3">Student ID</th>
                   <th className="p-3">Name</th>
@@ -111,7 +111,7 @@ export default function RiskPage() {
                   risks.map((r) => (
                     <tr
                       key={`${r.id}-${r.student_id}`}
-                      className="border-b hover:bg-gray-50"
+                      className="border-b border-indigo-50 hover:bg-white transition-colors duration-200"
                     >
                       <td className="p-3">{r.student_id}</td>
                       <td className="p-3">{r.name}</td>

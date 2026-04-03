@@ -13,9 +13,9 @@ const RISK_LABELS = {
 
 /* Badge styles */
 const RISK_BADGE_CLASSES = {
-  dropout: "bg-red-100 text-red-700",
-  enrolled: "bg-yellow-100 text-yellow-700",
-  graduate: "bg-green-100 text-green-700",
+  dropout: "bg-red-100 text-red-700 ring-1 ring-red-200 shadow-sm",
+  enrolled: "bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200 shadow-sm",
+  graduate: "bg-green-100 text-green-700 ring-1 ring-green-200 shadow-sm",
 };
 
 export default function StudentsPage() {
@@ -97,7 +97,7 @@ export default function StudentsPage() {
   const classOptions = [...new Set(students.map((s) => s.class_name))];
 
   return (
-    <div className="h-screen bg-slate-100 flex flex-col">
+    <div className="h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-cyan-50 flex flex-col text-slate-800">
       <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden">
@@ -106,16 +106,16 @@ export default function StudentsPage() {
           closeSidebar={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 p-6 overflow-y-auto bg-slate-50">
+        <main className="flex-1 p-6 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4 text-blue-700">
             Students List
           </h2>
 
           {/* Filters */}
           {isSuperAdmin && (
-            <div className="bg-white shadow rounded-xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 border border-white">
               <select
-                className="border rounded px-3 py-2"
+                className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
                 value={filters.className}
                 onChange={(e) =>
                   setFilters({ ...filters, className: e.target.value })
@@ -130,7 +130,7 @@ export default function StudentsPage() {
               </select>
 
               <select
-                className="border rounded px-3 py-2"
+                className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
                 value={filters.status}
                 onChange={(e) =>
                   setFilters({ ...filters, status: e.target.value })
@@ -146,7 +146,7 @@ export default function StudentsPage() {
                 type="number"
                 step="0.1"
                 placeholder="Min Grade"
-                className="border rounded px-3 py-2"
+                className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
                 value={filters.grade}
                 onChange={(e) =>
                   setFilters({ ...filters, grade: Number(e.target.value) })
@@ -157,7 +157,7 @@ export default function StudentsPage() {
               <input
                 type="number"
                 placeholder="Min Attendance %"
-                className="border rounded px-3 py-2"
+                className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
                 value={filters.minAttendance}
                 onChange={(e) =>
                   setFilters({
@@ -168,7 +168,7 @@ export default function StudentsPage() {
               />
 
               <select
-                className="border rounded px-3 py-2"
+                className="border border-indigo-100 rounded-lg px-3 py-2 bg-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all shadow-sm"
                 value={filters.feeDue}
                 onChange={(e) =>
                   setFilters({ ...filters, feeDue: e.target.value })
@@ -182,9 +182,9 @@ export default function StudentsPage() {
           )}
 
           {/* Table */}
-          <div className="overflow-x-auto bg-white shadow-md rounded-xl">
+          <div className="overflow-x-auto bg-white/70 backdrop-blur-md shadow-lg shadow-indigo-100/50 rounded-2xl border border-white">
             <table className="w-full text-sm text-left">
-              <thead className="bg-blue-600 text-white">
+              <thead className="bg-indigo-50/80 text-indigo-800 border-b border-indigo-100">
                 <tr>
                   <th className="px-6 py-3">Name</th>
                   <th className="px-6 py-3">Class</th>
@@ -201,7 +201,7 @@ export default function StudentsPage() {
                     const riskKey = s.risk_level?.toLowerCase() || "enrolled";
 
                     return (
-                      <tr key={s.id} className="border-b hover:bg-blue-50">
+                      <tr key={s.id} className="border-b border-indigo-50 hover:bg-white transition-colors duration-200">
                         <td className="px-6 py-3">{s.name}</td>
                         <td className="px-6 py-3">{s.class_name}</td>
                         <td className="px-6 py-3">{s.attendance}%</td>
